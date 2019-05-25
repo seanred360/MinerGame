@@ -6,10 +6,6 @@ public class BillboardScript : MonoBehaviour
 {
     public Camera m_cam;
 
-    private void Awake()
-    {
-        m_cam = Camera.main;
-    }
     // Update is called once per frame
     void Update()
     {
