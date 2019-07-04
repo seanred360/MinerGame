@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using UnityEngine.AI;
 using System.Collections;
+using UnityStandardAssets.Characters.ThirdPerson;
+using RootMotion.Dynamics;
 
 public class PlayerController : MonoBehaviour
 {
@@ -8,7 +10,14 @@ public class PlayerController : MonoBehaviour
     public NavMeshAgent agent;
     bool m_isMoving;
     public bool m_canMove = true;
+    public ThirdPersonCharacter character;
+    public PuppetMaster m_puppetMaster;
 
+    private void Awake()
+    {
+        cam = Camera.main;
+        agent.updateRotation = false;
+    }
     // Update is called once per frame
     void Update()
     {
@@ -19,7 +28,8 @@ public class PlayerController : MonoBehaviour
             if (Physics.Raycast(ray, out RaycastHit hit))
             {
                 m_isMoving = true;
-                agent.SetDestination(hit.point + new Vector3(0, 0, 2));
+                //agent.SetDestination(hit.point + new Vector3(0, 0, 2));
+                agent.SetDestination(hit.point);
             }
             else Debug.Log("no possible paths");
             if (hit.collider.tag == "Ore")
@@ -41,23 +51,29 @@ public class PlayerController : MonoBehaviour
             }
             if (m_isMoving == true)
             {
-                this.GetComponentInChildren<Animator>().SetBool("isWalking", true);
+                //this.GetComponentInChildren<Animator>().SetBool("isWalking", true);
                 this.GetComponentInChildren<Animator>().SetBool("isMining", false);
             }
-        
+        if(agent.remainingDistance > agent.stoppingDistance)
+        {
+            character.Move(agent.desiredVelocity, false, false);
+        } else
+        {
+            character.Move(Vector3.zero, false, false);
+        }
     }
     void OnTriggerEnter(Collider other)
     {
         if(other.tag == "Ore")
         {
-            m_isMoving = false;
+           // m_isMoving = false;
         }
     }
     void OnTriggerExit(Collider other)
     {
         if (other.tag == "Ore")
         {
-            m_isMoving = true;
+            //m_isMoving = true;
         }
     }
     IEnumerator StartMining(GameObject targetOre)
@@ -70,12 +86,24 @@ public class PlayerController : MonoBehaviour
         { 
               yield return null;
         }
-        this.GetComponentInChildren<Animator>().SetBool("isMining", true);
+        this.transform.LookAt(targetOre.transform.position);
+        this.GetComponent<Animator>().SetBool("isMining", true);
         targetOre.GetComponent<Ore>().StartMineOre();
     }
 
     public void StopMining()
     {
         this.GetComponentInChildren<Animator>().SetBool("isMining", false);
+    }
+
+    public void KillPuppet()
+    {
+        agent.ResetPath();
+        m_puppetMaster.Kill();
+        Invoke("ResurrectPuppet",5f);
+    }
+    public void ResurrectPuppet()
+    {
+        m_puppetMaster.Resurrect();
     }
 }
