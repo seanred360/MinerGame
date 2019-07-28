@@ -2990,7 +2990,7 @@ GameObject:
   - component: {fileID: 8045249281597499346}
   m_Layer: 8
   m_Name: Miner_fb_test2 (2)
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3118,7 +3118,7 @@ MonoBehaviour:
   agent: {fileID: 8045249281597499347}
   m_canMove: 1
   character: {fileID: 8045249281597499344}
-  m_puppetMaster: {fileID: 0}
+  m_puppetMaster: {fileID: 4846864602958131136}
 --- !u!1 &8045249281647052247
 GameObject:
   m_ObjectHideFlags: 0

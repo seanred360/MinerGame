@@ -13,12 +13,19 @@ public class Ore : MonoBehaviour
     public PlayerController m_playerController;
     public GameObject rockParticlePrefab;
     public GameObject bombParticlePrefab;
+    GameObject audioManager;
     public OreType oreType = OreType.Regular;
 
-    void Awake()
+    public float explosionForce;
+    public float explosionRadius;
+    public float upwardsModifier;
+
+    void Start()
     {
         if(m_playerController == null)
-        m_playerController = GameObject.FindGameObjectWithTag("Player").GetComponentInChildren<PlayerController>();
+        m_playerController = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerController>();
+
+        audioManager = GameObject.FindGameObjectWithTag("Sound");
 
         m_health = 3;
     }
@@ -54,8 +61,9 @@ public class Ore : MonoBehaviour
             case OreType.Regular:
                 break;
             case OreType.Bomb:
-                m_playerController.gameObject.GetComponent<PlayerController>().KillPuppet();
-                GameObject clone = Instantiate(bombParticlePrefab, transform.position, transform.rotation);
+                Explode();
+                //m_playerController.gameObject.GetComponent<PlayerController>().KillPuppet();
+                //GameObject clone = Instantiate(bombParticlePrefab, transform.position, transform.rotation);
                 break;
         }
         m_playerController.m_canMove = true;
@@ -68,6 +76,23 @@ public class Ore : MonoBehaviour
         if( other.tag == "Wall")
         {
             Destroy(this.gameObject);
+        }
+    }
+
+    void Explode()
+    {
+        Instantiate(bombParticlePrefab, transform.position, transform.rotation);
+
+        Collider[] colliders = Physics.OverlapSphere(transform.position, explosionRadius);
+        foreach (Collider nearbyObject in colliders)
+        {
+            Rigidbody rb = nearbyObject.GetComponent<Rigidbody>();
+            if (rb != null)
+            {
+                rb.AddExplosionForce(explosionForce, transform.position, explosionRadius, upwardsModifier);
+                audioManager.GetComponent<AudioManager>().PlaySFX(0);
+                m_playerController.gameObject.GetComponent<PlayerController>().KillPuppet();
+            }
         }
     }
 }
